@@ -213,9 +213,9 @@ export default function Home() {
           <UserButton afterSignOutUrl="/" />
         </div>
       </div>
-      <div className={cn("flex-1 overflow-y-aut rounded-md p-2", playground)}>
+      <div className={cn("flex-1 overflow-y-auto rounded-md p-2", playground)}>
         {!isLoading ? (
-          <div>
+          <div className="">
             {message.map((msg, index) => (
               <div key={index} className="flex items-center mb-4">
                 {msg.role === "user" ? <UserAvatar /> : <BotAvatar />}
