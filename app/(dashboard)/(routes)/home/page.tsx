@@ -178,7 +178,7 @@ export default function Home() {
   const { background, text, button, playground } = getThemeColors();
 
   return (
-    <div className={cn("flex flex-col h-screen p-4", background)}>
+    <div className={cn("flex flex-col h-[92vh] md:h-screen p-4", background)}>
       <div className={cn("flex justify-between items-center mb-4")}>
         <h1 className={cn("text-2xl font-bold text-black", text)}>
           Gemini Chat
