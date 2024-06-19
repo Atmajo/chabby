@@ -12,7 +12,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +43,8 @@ export default function Home() {
   const [chat, setChat] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [theme, setTheme] = useState<string>("light");
+
+  const chatEndRef = useRef<null | HTMLDivElement>(null);
 
   const {
     toast,
@@ -144,11 +146,19 @@ export default function Home() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && userInput.length > 0) {
       handleSendMessage();
     }
   };
 
+  useEffect(() => {
+    if (chatEndRef.current) {
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 0);
+    }
+  }, [message]);
+  
   const getThemeColors = () => {
     switch (theme) {
       case "light":
@@ -156,7 +166,8 @@ export default function Home() {
           background: "bg-white",
           playground: "bg-gray-300",
           text: "text-black",
-          button: "",
+          select: "bg-gray-300",
+          Loader: "text-black",
         };
       case "dark":
         return {
@@ -164,25 +175,27 @@ export default function Home() {
           playground: "bg-white/10",
           text: "text-white",
           button: "bg-gray-400",
+          loader: "text-white",
+          select: "bg-white/20",
         };
       default:
         return {
           background: "bg-white",
           playground: "bg-gray-300",
           text: "text-black",
-          button: "",
+          select: "bg-gray-300",
+          Loader: "text-black",
         };
     }
   };
 
-  const { background, text, button, playground } = getThemeColors();
+  const { background, text, button, playground, loader, select } =
+    getThemeColors();
 
   return (
     <div className={cn("flex flex-col h-[92vh] md:h-screen p-4", background)}>
       <div className={cn("flex justify-between items-center mb-4")}>
-        <h1 className={cn("text-2xl font-bold text-black", text)}>
-          Gemini Chat
-        </h1>
+        <h1 className={cn("text-2xl font-bold text-black", text)}>Chabby</h1>
         <div className="flex justify-center items-center gap-x-4">
           <Form {...form}>
             <form onChange={form.handleSubmit(handleThemeChange)}>
@@ -197,10 +210,14 @@ export default function Home() {
                       }}
                       defaultValue={field.value}
                     >
-                      <SelectTrigger className="outline-none">
+                      <SelectTrigger
+                        className={cn("outline-none w-24", select)}
+                      >
                         <SelectValue placeholder="Light" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent
+                        className={cn("outline-none w-24", select)}
+                      >
                         <SelectItem value="light">Light</SelectItem>
                         <SelectItem value="dark">Dark</SelectItem>
                       </SelectContent>
@@ -213,21 +230,27 @@ export default function Home() {
           <UserButton afterSignOutUrl="/" />
         </div>
       </div>
-      <div className={cn("flex-1 overflow-y-auto rounded-md p-2", playground)}>
-        {!isLoading ? (
-          <div className="">
-            {message.map((msg, index) => (
-              <div key={index} className="flex items-center mb-4">
+      <div
+        ref={chatEndRef}
+        className={cn("flex-1 overflow-y-auto rounded-md p-2", playground)}
+      >
+        <div className="">
+          {message.map((msg, index) => (
+            <div key={index} className="flex flex-col mb-4">
+              <div className="flex justify-start gap-x-2">
                 {msg.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                <span className={cn("p-2 rounded-lg", text)}>{msg.text}</span>
+                <span className={cn("rounded-lg", text)}>{msg.text}</span>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex justify-center items-center h-full">
-            <Loader color="text-black" />
-          </div>
-        )}
+              {isLoading &&
+                msg.role === "user" &&
+                index === message.length - 1 && (
+                  <div className="mt-2">
+                    <Loader color={loader} />
+                  </div>
+                )}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="flex items-center space-x-2 mt-4">
         <input
@@ -241,7 +264,7 @@ export default function Home() {
         />
         <Button
           onClick={handleSendMessage}
-          disabled={isLoading}
+          disabled={userInput.length === 0}
           className={cn(
             "p-2 rounded-md hover:bg-opacity-80 focus:outline-none",
             button

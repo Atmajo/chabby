@@ -6,7 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Gemini Chat",
+  title: "Chabby",
   description: "A simplle chatbot using Gemini Flash 1.5 model",
 };
 
